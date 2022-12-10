@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Test Map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="index.js"></script>
+    <style>
+        table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 100px;
+            bottom: 40px;
+            margin-left: 40px;
+            padding-right: 40px;
+            border: 3px solid black;
+            display: block;
+            width: 90%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="home"><h1>HOME PAGE</h1></div>
+    <div class="topnav">
+        <a class="active" href="">Home</a>
+        <a href="">News</a>
+        <a href="">Contact</a>
+        <a href="">About</a>
+      </div>
+    <div id="map"></div>
+
+
+    <script>
+
+        var array = [];
+        $.ajax({
+            type: 'get',
+            url: 'https://webpagebucket77.s3.eu-west-1.amazonaws.com/Head',
+            success: function (response) {
+                const cars = []
+                console.log(response[1])
+                for (var i = 0; i < response.length; i++) {
+                    var newItem = `<div class="col-3 my-3 mx-4 shadow-lg bg-body rounded"> 
+            <h5 class="font-weight-bold my-2 text-center"> ${response[i].name} </h5> 
+            <p> ${response[i].address}  </p>
+            </div>`
+
+                    var map_item =  {
+                                            "type": "Feature",
+                                            "geometry": {
+                                                "type": "Point",
+                                                "coordinates": [
+                                                parseFloat(response[i].log), parseFloat(response[i].lat)
+                                                ]
+                                            },
+                                            "properties": {
+                                                "title": response[i].name
+                                            }
+                                        } 
+                    $('#myitems').append(newItem);
+                    cars[i] = (map_item);
+                }
+                console.log(cars[0])
+                mapboxgl.accessToken = 'pk.eyJ1IjoiZXVhbmNoYWxtZXJzIiwiYSI6ImNsMzMyYWN4NDAzM2EzYm4xdGxyY3lnbnUifQ.IKwG-sz-SSWYqK_Ke97eVQ';
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+                    style: 'mapbox://styles/mapbox/streets-v12',
+                    center: [-2.529596350592783,54.591692038465254],
+                    zoom: 5
+                });
+                info = {
+                                    'type': 'FeatureCollection',
+                                    'features': {
+                                       cars
+                                }
+                        }
+                
+                map.on('load', () => {
+                    // Add an image to use as a custom marker
+                    map.loadImage(
+                        'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+                        (error, image) => {
+                            if (error) throw error;
+                            map.addImage('custom-marker', image);
+                            map.addControl(
+                                new MapboxGeocoder({
+                                accessToken: mapboxgl.accessToken,
+                                mapboxgl: mapboxgl
+                                })
+                                );
+                            // Add a GeoJSON source with 2 points
+                            map.addSource('points', {
+                                'type': 'geojson',
+                                'data': 'https://webpagebucket77.s3.eu-west-1.amazonaws.com/myfile.geojson'});
+                            // Add a symbol layer
+                            map.addLayer({
+                                'id': 'points',
+                                'type': 'symbol',
+                                'source': 'points',
+                                'layout': {
+                                    'icon-image': 'custom-marker',
+                                    // get the title name from the source's "title" property
+                                    'text-field': ['get', 'price'],
+                                    'text-font': [
+                                        'Open Sans Semibold',
+                                        'Arial Unicode MS Bold'
+                                    ],
+                                    'text-offset': [0, 1.25],
+                                    'text-anchor': 'top'
+                                }
+                            });
+                            
+                        }
+                    );
+                });
+ 
+
+                map.on('click', 'points', (e) => {
+                    // Copy coordinates array.
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const url = e.features[0].properties.link;
+                    
+                    // Ensure that if the map is zoomed out such that multiple
+                    // copies of the feature are visible, the popup appears
+                    // over the copy being pointed to.
+                    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                    }
+                
+// add this on the update button as a lambda function page?? or a form that is prefilled
+
+                    // window.open("https://webpagebucket77.s3.eu-west-1.amazonaws.com/ReadMe","_self")
+                    
+                    new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(url)
+                    .addTo(map);
+                    });
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+
+
+
+    </script>
+
+</body>
+
+</html>
