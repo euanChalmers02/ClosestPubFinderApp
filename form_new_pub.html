@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("#btn1").click(function(){
+    $("p").append("<br><label for='Drink_Name'>Drink Name</label><br><input type='text' id='Drink_Name' name='Drink_Name'><br><label for='Price'>Drink Price</label><br><input type='text' id='Price' name='Price'>");
+  });
+});
+</script>
+    </head>
+<body>
+
+<h2>Add Pub</h2>
+<p><strong>Advice:</strong>Just fill in as much information as you have. Please note all fields are optional and may take up to a day to be added to the map.</p>
+
+<form action="https://vrymj5ggmqf45bpqwporbcg5ie0gykwp.lambda-url.eu-west-1.on.aws/">
+    <label for="Pub_Name">Pub Name</label><br>
+    <input type="text" id="Pub_Name" name="Pub_Name"><br><br>
+    <label for="Address">Address</label><br>
+    <input type="text" id="Address" name="Address" value=""><br><br>
+    <label for="Postcode">Postcode</label><br>
+    <input type="text" id="Postcode" name="Postcode" value=""><br><br>
+
+    <div id="idr"><p></p></div>
+
+<h4><strong>Optional Pub Features</strong></h4>
+
+  <input type="checkbox" id="beer_garden" name="beer_garden" value="beer_garden">
+  <label for="beer_garden">Has a beer garden?</label><br>
+  <input type="checkbox" id="Live_music" name="Live_music" value="Car">
+  <label for="Live_music">Has live music?</label><br>
+  <input type="checkbox" id="student_dis" name="student_dis" value="Boat">
+  <label for="student_dis">Has student discounts?</label><br><br>
+  <input type="submit" value="Submit">
+</form>
+<button id="btn1">Add Drink Price</button>
+
+</body>
+</html>
+
