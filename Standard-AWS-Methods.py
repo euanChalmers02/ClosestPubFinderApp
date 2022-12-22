@@ -8,18 +8,18 @@ def delete_dynomodb(log_id):
     response = table.delete_item(Key={"LogID": str(log_id)})
     return True
   
-  def get_from_dynomo():
-    dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
-    table = dynamodb.Table('TABLE-NAME')
-    response = table.scan()
-    data = response['Items']
-    
-    while 'LastEvaluatedKey' in response:
-        response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
-        data.extend(response['Items'])
-    # print(data)
-    df = pd.DataFrame(data)
-    return df
+def get_from_dynomo():
+dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
+table = dynamodb.Table('TABLE-NAME')
+response = table.scan()
+data = response['Items']
+
+while 'LastEvaluatedKey' in response:
+    response = table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+    data.extend(response['Items'])
+# print(data)
+df = pd.DataFrame(data)
+return df
   
 ACCESS_KEY = ''
 SECRET_KEY = ''
