@@ -2,6 +2,28 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 import pandas as pd
 
+ACCESS_KEY = ''
+SECRET_KEY = ''
+
+# simplify by removing the list comp to remove the filter
+def get_all_files_in_bucket_filter(filtr):
+    keys = []
+    
+    session = boto3.Session( 
+             aws_access_key_id=ACCESS_KEY, 
+             aws_secret_access_key=SECRET_KEY)
+
+    #Then use the session to get the resource
+    s3 = session.resource('s3')
+
+    my_bucket = s3.Bucket('webpagebucket77')
+
+    for my_bucket_object in my_bucket.objects.all():
+        keys.append((my_bucket_object.key))
+
+    newlist = [x for x in keys if filtr in x]
+    print(newlist)
+
 def delete_dynomodb(log_id):
     dynamodb = boto3.resource('dynamodb', region_name='eu-west-1')
     table = dynamodb.Table('TABLE-NAME')
@@ -21,8 +43,6 @@ while 'LastEvaluatedKey' in response:
 df = pd.DataFrame(data)
 return df
   
-ACCESS_KEY = ''
-SECRET_KEY = ''
 
 def upload_to_aws(local_file, bucket, s3_file):
     s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY,
